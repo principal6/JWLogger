@@ -10,14 +10,36 @@
 
 namespace JWEngine
 {
-	#define FILE_LINE __FILE__, __LINE__
+	#define THREAD_LOGGER_DECL JWEngine::JWLogger thread_logger{}
+	#define THREAD_LOGGER thread_logger
 
-	static constexpr char KLogHead[]{ "        date        |    time    |  thread  | file\t:line\t| lev | comment  \n" };
+	#define THREAD_LOG(thread_id, comment, LogLevel) thread_logger.Log(__FILE__, __LINE__, thread_id, comment, LogLevel)
+	#define THREAD_LOG_D(thread_id, comment) THREAD_LOG(thread_id, comment, ELogLevel::Default)
+	#define THREAD_LOG_I(thread_id, comment) THREAD_LOG(thread_id, comment, ELogLevel::Important)
+	#define THREAD_LOG_W(thread_id, comment) THREAD_LOG(thread_id, comment, ELogLevel::Warning)
+	#define THREAD_LOG_F(thread_id, comment) THREAD_LOG(thread_id, comment, ELogLevel::Fatal)
+
+	#define THREAD_LOGGER_SEND_OUT(out) if (out) { *out = thread_logger; }
+
+	#define JOIN_THREAD_LOG(thread_logger) ex_logger.JoinLog(thread_logger)
+
+	#define GLOBAL_LOGGER_DECL extern JWEngine::JWLogger ex_logger{}
+	#define GLOBAL_LOGGER_GET extern JWEngine::JWLogger ex_logger
+	#define GLOBAL_LOGGER ex_logger
+
+	#define GLOBAL_LOG(comment, LogLevel) ex_logger.Log(__FILE__, __LINE__, 0, comment, LogLevel)
+	#define GLOBAL_LOG_D(comment) GLOBAL_LOG(comment, ELogLevel::Default)
+	#define GLOBAL_LOG_I(comment) GLOBAL_LOG(comment, ELogLevel::Important)
+	#define GLOBAL_LOG_W(comment) GLOBAL_LOG(comment, ELogLevel::Warning)
+	#define GLOBAL_LOG_F(comment) GLOBAL_LOG(comment, ELogLevel::Fatal)
+	
+	static constexpr char KLogHead[]{ "        date        |    time    |  thread  |        file       :line\t| lev | comment  \n" };
+	static constexpr int KSZFileLen{ 20 };
 
 	enum class ELogLevel
 	{
 		Default,
-		See,
+		Important,
 		Warning,
 		Fatal,
 	};
@@ -32,7 +54,7 @@ namespace JWEngine
 		std::string log{};
 	};
 
-	bool SortLogLess(const SLogDatum& a, const SLogDatum& b)
+	static bool SortLogLess(const SLogDatum& a, const SLogDatum& b)
 	{
 		return (a.time < b.time);
 	}
@@ -42,46 +64,51 @@ namespace JWEngine
 	public:
 		void Log(const char* file, int line, int thread_id, const char* comment, ELogLevel level = ELogLevel::Default)
 		{
-			char date[200]{};
-			std::time_t time_now{ m_clock.to_time_t(m_clock.now()) };
+			char sz_date[200]{};
+			auto time_now{ m_clock.to_time_t(m_clock.now()) };
 			std::tm tm{};
 			localtime_s(&tm, &time_now);
-			strftime(date, 200, "%Y-%M-%d %T", &tm);
+			strftime(sz_date, 200, "%Y-%m-%d %T", &tm);
+			sz_date[strlen(sz_date)] = NULL;
 
-			if (date[strlen(date) - 1] == '\n')
+			auto ll_time = m_clock.now().time_since_epoch().count();
+
+			std::string str_file{ file };
+			str_file = str_file.substr(str_file.find_last_of('\\') + 1);
+
+			char sz_file[KSZFileLen]{};
+			memset(sz_file, ' ', KSZFileLen);
+			for (size_t i = 0; i < ((str_file.size() > KSZFileLen - 2) ? KSZFileLen - 2 : str_file.size()); ++i)
 			{
-				date[strlen(date) - 1] = NULL;
+				sz_file[i] = str_file[i];
 			}
-			auto time_value = m_clock.now().time_since_epoch().count();
+			sz_file[KSZFileLen - 2] = ':';
+			sz_file[KSZFileLen - 1] = '\0';
 
-			std::string sfile{ file };
-			auto upper = sfile.find_last_of('\\');
-			sfile = sfile.substr(upper + 1);
-
-			char s_level[4]{};
+			char sz_level[4]{};
 			switch (level)
 			{
 			case JWEngine::ELogLevel::Default:
-				strcpy_s(s_level, "---");
+				strcpy_s(sz_level, "---");
 				break;
-			case JWEngine::ELogLevel::See:
-				strcpy_s(s_level, "SEE");
+			case JWEngine::ELogLevel::Important:
+				strcpy_s(sz_level, "IMP");
 				break;
 			case JWEngine::ELogLevel::Warning:
-				strcpy_s(s_level, "WRN");
+				strcpy_s(sz_level, "WRN");
 				break;
 			case JWEngine::ELogLevel::Fatal:
-				strcpy_s(s_level, "FTL");
+				strcpy_s(sz_level, "FTL");
 				break;
 			default:
 				break;
 			}
 			
 			char temp_str[300]{};
-			sprintf_s(temp_str, "%s | %lld | thread:%d | %s\t:%d\t| %s | %s\n",
-				date, time_value % 10000000000, thread_id, sfile.c_str(), line, s_level, comment);
+			sprintf_s(temp_str, "%s | %lld | thread:%d | %s%d\t| %s | %s\n",
+				sz_date, ll_time % 10000000000, thread_id, sz_file, line, sz_level, comment);
 
-			m_data.emplace_back(time_value, level, temp_str);
+			m_data.emplace_back(ll_time, level, temp_str);
 		};
 
 		void JoinLog(const JWLogger& thread_log) 
@@ -104,7 +131,7 @@ namespace JWEngine
 				case JWEngine::ELogLevel::Default:
 					SetConsoleTextAttribute(m_hConsole, FOREGROUND_INTENSITY);
 					break;
-				case JWEngine::ELogLevel::See:
+				case JWEngine::ELogLevel::Important:
 					SetConsoleTextAttribute(m_hConsole, FOREGROUND_GREEN);
 					break;
 				case JWEngine::ELogLevel::Warning:

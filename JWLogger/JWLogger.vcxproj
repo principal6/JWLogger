@@ -123,9 +123,14 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="CClassA.h" />
+    <ClInclude Include="CClassB.h" />
     <ClInclude Include="JWLogger.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="CClassA.cpp" />
+    <ClCompile Include="CClassB.cpp" />
+    <ClCompile Include="CommonObject.cpp" />
     <ClCompile Include="test.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

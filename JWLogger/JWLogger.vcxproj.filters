@@ -18,9 +18,24 @@
     <ClInclude Include="JWLogger.h">
       <Filter>소스 파일</Filter>
     </ClInclude>
+    <ClInclude Include="CClassA.h">
+      <Filter>소스 파일</Filter>
+    </ClInclude>
+    <ClInclude Include="CClassB.h">
+      <Filter>소스 파일</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="test.cpp">
+      <Filter>소스 파일</Filter>
+    </ClCompile>
+    <ClCompile Include="CClassA.cpp">
+      <Filter>소스 파일</Filter>
+    </ClCompile>
+    <ClCompile Include="CClassB.cpp">
+      <Filter>소스 파일</Filter>
+    </ClCompile>
+    <ClCompile Include="CommonObject.cpp">
       <Filter>소스 파일</Filter>
     </ClCompile>
   </ItemGroup>

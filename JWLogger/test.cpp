@@ -1,24 +1,23 @@
 #include <thread>
 #include "JWLogger.h"
+#include "CClassA.h"
+#include "CClassB.h"
 
 using namespace std;
 using namespace JWEngine;
 
-static JWLogger MyLogger{};
+GLOBAL_LOGGER_GET;
 
 void foo(int thread_id, int count, JWLogger* out_logger)
 {
-	JWLogger internal_logger{};
+	THREAD_LOGGER_DECL;
 
 	for (int i = 0; i < count; ++i)
 	{
-		internal_logger.Log(FILE_LINE, thread_id, ("iterating... " + to_string(i)).c_str());
+		THREAD_LOG_D(thread_id, ("iterating... " + to_string(i)).c_str());
 	}
 
-	if (out_logger)
-	{
-		*out_logger = internal_logger;
-	}
+	THREAD_LOGGER_SEND_OUT(out_logger);
 }
 
 int main()
@@ -30,12 +29,17 @@ int main()
 	a.join();
 	b.join();
 
-	MyLogger.JoinLog(logger_a);
-	MyLogger.JoinLog(logger_b);
+	JOIN_THREAD_LOG(logger_a);
+	JOIN_THREAD_LOG(logger_b);
 
-	MyLogger.DisplayEntireLog();
+	CClassA class_a{};
+	class_a.foo();
 
-	MyLogger.SaveToFile("test_log.txt");
+	CClassB class_b{};
+	class_b.bar();
+
+	GLOBAL_LOGGER.DisplayEntireLog();
+	GLOBAL_LOGGER.SaveToFile("test_log.txt");
 
 	return 0;
 }
