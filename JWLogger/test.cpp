@@ -6,18 +6,18 @@
 using namespace std;
 using namespace JWEngine;
 
-GLOBAL_LOGGER_GET;
+GLOBAL_LOGGER_DECL;
 
 void foo(int thread_id, int count, JWLogger* out_logger)
 {
-	THREAD_LOGGER_DECL;
+	THREAD_LOGGER_DECL_FREE_FUNC_START(thread_id);
 
 	for (int i = 0; i < count; ++i)
 	{
 		THREAD_LOG_D(thread_id, ("iterating... " + to_string(i)).c_str());
 	}
 
-	THREAD_LOGGER_SEND_OUT(out_logger);
+	THREAD_LOGGER_SEND_OUT_FREE_FUNC_END(thread_id, out_logger);
 }
 
 int main()

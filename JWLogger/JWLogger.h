@@ -14,25 +14,43 @@ namespace JWEngine
 	#define THREAD_LOGGER thread_logger
 
 	#define THREAD_LOG(thread_id, comment, LogLevel) thread_logger.Log(__FILE__, __LINE__, thread_id, comment, LogLevel)
-	#define THREAD_LOG_D(thread_id, comment) THREAD_LOG(thread_id, comment, ELogLevel::Default)
-	#define THREAD_LOG_I(thread_id, comment) THREAD_LOG(thread_id, comment, ELogLevel::Important)
-	#define THREAD_LOG_W(thread_id, comment) THREAD_LOG(thread_id, comment, ELogLevel::Warning)
-	#define THREAD_LOG_F(thread_id, comment) THREAD_LOG(thread_id, comment, ELogLevel::Fatal)
+	#define THREAD_LOG_D(thread_id, comment) THREAD_LOG(thread_id, comment, JWEngine::ELogLevel::Default)
+	#define THREAD_LOG_I(thread_id, comment) THREAD_LOG(thread_id, comment, JWEngine::ELogLevel::Important)
+	#define THREAD_LOG_W(thread_id, comment) THREAD_LOG(thread_id, comment, JWEngine::ELogLevel::Warning)
+	#define THREAD_LOG_F(thread_id, comment) THREAD_LOG(thread_id, comment, JWEngine::ELogLevel::Fatal)
 
 	#define THREAD_LOGGER_SEND_OUT(out) if (out) { *out = thread_logger; }
+
+	#define THREAD_LOG_METHOD_START(thread_id) THREAD_LOG(thread_id, (std::string(typeid(*this).name()) + "::" + __func__ + "() Start").c_str(), JWEngine::ELogLevel::Default)
+	#define THREAD_LOG_METHOD_END(thread_id) THREAD_LOG(thread_id, (std::string(typeid(*this).name()) + "::" + __func__ + "() End").c_str(), JWEngine::ELogLevel::Default)
+
+	#define THREAD_LOG_FREE_FUNC_START(thread_id) THREAD_LOG(thread_id, (std::string(__func__) + "() Start").c_str(), JWEngine::ELogLevel::Default)
+	#define THREAD_LOG_FREE_FUNC_END(thread_id) THREAD_LOG(thread_id, (std::string(__func__) + "() End").c_str(), JWEngine::ELogLevel::Default)
+
+	#define THREAD_LOGGER_DECL_METHOD_START(thread_id) THREAD_LOGGER_DECL; THREAD_LOG_METHOD_START(thread_id)
+	#define THREAD_LOGGER_SEND_OUT_METHOD_END(thread_id, out) THREAD_LOG_METHOD_END(thread_id); THREAD_LOGGER_SEND_OUT(out)
+
+	#define THREAD_LOGGER_DECL_FREE_FUNC_START(thread_id) THREAD_LOGGER_DECL; THREAD_LOG_FREE_FUNC_START(thread_id)
+	#define THREAD_LOGGER_SEND_OUT_FREE_FUNC_END(thread_id, out) THREAD_LOG_FREE_FUNC_START(thread_id); THREAD_LOGGER_SEND_OUT(out)
 
 	#define JOIN_THREAD_LOG(thread_logger) ex_logger.JoinLog(thread_logger)
 
 	#define GLOBAL_LOGGER_DECL extern JWEngine::JWLogger ex_logger{}
-	#define GLOBAL_LOGGER_GET extern JWEngine::JWLogger ex_logger
+	#define GLOBAL_LOGGER_USE extern JWEngine::JWLogger ex_logger
 	#define GLOBAL_LOGGER ex_logger
 
 	#define GLOBAL_LOG(comment, LogLevel) ex_logger.Log(__FILE__, __LINE__, 0, comment, LogLevel)
-	#define GLOBAL_LOG_D(comment) GLOBAL_LOG(comment, ELogLevel::Default)
-	#define GLOBAL_LOG_I(comment) GLOBAL_LOG(comment, ELogLevel::Important)
-	#define GLOBAL_LOG_W(comment) GLOBAL_LOG(comment, ELogLevel::Warning)
-	#define GLOBAL_LOG_F(comment) GLOBAL_LOG(comment, ELogLevel::Fatal)
+	#define GLOBAL_LOG_D(comment) GLOBAL_LOG(comment, JWEngine::ELogLevel::Default)
+	#define GLOBAL_LOG_I(comment) GLOBAL_LOG(comment, JWEngine::ELogLevel::Important)
+	#define GLOBAL_LOG_W(comment) GLOBAL_LOG(comment, JWEngine::ELogLevel::Warning)
+	#define GLOBAL_LOG_F(comment) GLOBAL_LOG(comment, JWEngine::ELogLevel::Fatal)
+
+	#define GLOBAL_LOG_METHOD_START GLOBAL_LOG((std::string(typeid(*this).name()) + "::" + __func__ + "() Start").c_str(), JWEngine::ELogLevel::Default)
+	#define GLOBAL_LOG_METHOD_END GLOBAL_LOG((std::string(typeid(*this).name()) + "::" + __func__ + "() End").c_str(), JWEngine::ELogLevel::Default)
 	
+	#define GLOBAL_LOG_FREE_FUNC_START GLOBAL_LOG((std::string(__func__) + "() Start").c_str(), JWEngine::ELogLevel::Default)
+	#define GLOBAL_LOG_FREE_FUNC_END GLOBAL_LOG((std::string(__func__) + "() End").c_str(), JWEngine::ELogLevel::Default)
+
 	static constexpr char KLogHead[]{ "        date        |    time    |  thread  |        file       :line\t| lev | comment  \n" };
 	static constexpr int KSZFileLen{ 20 };
 
