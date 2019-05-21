@@ -1,14 +1,14 @@
 #include "CClassB.h"
 
-GLOBAL_LOGGER_USE;
+JW_LOGGER_USE;
 
 void CClassB::bar()
 {
-	GLOBAL_LOG_METHOD_START;
+	JW_LOG_METHOD_START(0);
 
 	using namespace JWEngine;
 
-	GLOBAL_LOG_D("testing bar()");
+	JW_LOG_D(0, "testing bar()");
 
-	GLOBAL_LOG_METHOD_END;
+	JW_LOG_METHOD_END(0);
 }

@@ -6,31 +6,28 @@
 using namespace std;
 using namespace JWEngine;
 
-GLOBAL_LOGGER_DECL;
+JW_LOGGER_DECL;
 
-void foo(int thread_id, int count, JWLogger* out_logger)
+void foo(int thread_id, int count)
 {
-	THREAD_LOGGER_DECL_FREE_FUNC_START(thread_id);
+	JW_LOG_FREE_FUNC_START(thread_id);
 
 	for (int i = 0; i < count; ++i)
 	{
-		THREAD_LOG_D(thread_id, ("iterating... " + to_string(i)).c_str());
+		JW_LOG_D(thread_id, ("iterating... " + to_string(i)).c_str());
 	}
 
-	THREAD_LOGGER_SEND_OUT_FREE_FUNC_END(thread_id, out_logger);
+	JW_LOG_FREE_FUNC_END(thread_id);
 }
 
 int main()
 {
-	JWLogger logger_a{}, logger_b{};
+	JW_LOGGER_INITIALIZE;
 
-	thread a{ thread(foo, 0, 100, &logger_a) };
-	thread b{ thread(foo, 1, 100, &logger_b) };
+	thread a{ thread(foo, 0, 100) };
+	thread b{ thread(foo, 1, 100) };
 	a.join();
 	b.join();
-
-	JOIN_THREAD_LOG(logger_a);
-	JOIN_THREAD_LOG(logger_b);
 
 	CClassA class_a{};
 	class_a.foo();
@@ -38,8 +35,7 @@ int main()
 	CClassB class_b{};
 	class_b.bar();
 
-	GLOBAL_LOGGER.DisplayEntireLog();
-	GLOBAL_LOGGER.SaveToFile("test_log.txt");
+	JW_LOGGER_SAVE("test_log.txt");
 
 	return 0;
 }
